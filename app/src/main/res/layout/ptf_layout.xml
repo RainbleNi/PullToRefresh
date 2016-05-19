@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+
+    <com.pulltorefresh.rainbow.pull_to_refresh.PullToRefreshLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/grey_white">
+
+        <TextView
+            android:text="Loading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="This is content"
+            android:gravity="center"
+            android:background="@android:color/holo_green_light"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="20dp"/>
+
+    </com.pulltorefresh.rainbow.pull_to_refresh.PullToRefreshLayout>
+
+</FrameLayout>

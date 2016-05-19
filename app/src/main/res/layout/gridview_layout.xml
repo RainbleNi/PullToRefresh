@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+    android:padding="10dp">
+
+    <com.pulltorefresh.rainbow.pull_to_refresh.PullToRefreshLayout
+        android:id="@+id/ptf_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="加载中"
+            android:gravity="center"/>
+
+        <GridView
+            android:id="@+id/gridview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:numColumns="2"/>
+
+    </com.pulltorefresh.rainbow.pull_to_refresh.PullToRefreshLayout>
+
+</FrameLayout>

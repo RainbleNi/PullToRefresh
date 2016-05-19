@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PullToRefreshLayout">
+        <attr name="header_layout" format="reference"/>
+        <attr name="content_layout" format="reference"/>
+    </declare-styleable>
+    
+</resources>
