@@ -19,7 +19,6 @@ public class ScrollHandler implements Runnable {
     private static final float FRICTION = 0.5f;
     private final ScrollHandlerCallback mScrollHandlerCallback;
     private final Handler mHandler;
-    private boolean mIsRefreshing = false;
 
 
     private final Scroller mScroller;
@@ -27,11 +26,19 @@ public class ScrollHandler implements Runnable {
     interface ScrollHandlerCallback {
         void onOffsetChange(int offset);
         void startRefresh();
+        boolean canContentScrollUp();
+        void onScrollStateChanged(int newState);
     }
 
-    public ScrollHandler(Context context, ScrollHandlerCallback listener) {
+    private int mScrollState = STATE_ABOVE_REFRESH_LINE;
+    public static final int STATE_ABOVE_REFRESH_LINE = 0;
+    public static final int STATE_BELOW_REFRESH_LINE = 1;
+    public static final int STATE_REFRESHING = 2;
+    public static final int STATE_COMPLETE = 3;
+
+    public ScrollHandler(Context context, ScrollHandlerCallback scrollCallback) {
         mScroller = new Scroller(context);
-        mScrollHandlerCallback = listener;
+        mScrollHandlerCallback = scrollCallback;
         mHandler = new Handler(Looper.getMainLooper());
     }
 
@@ -48,33 +55,37 @@ public class ScrollHandler implements Runnable {
 
     void upOrCancel() {
         mStartAction = false;
-        if (mIsRefreshing) {
-            if (mCurrentOffsetY > mRefreshCriticalPosition) {
-                scrollToRefreshPosition();
-            }
-        } else {
-            if (mCurrentOffsetY < mRefreshCriticalPosition) {
+        switch (mScrollState) {
+            case STATE_REFRESHING:
+                if (mCurrentOffsetY > mRefreshCriticalPosition) {
+                    scrollToRefreshPosition();
+                }
+                break;
+            case STATE_COMPLETE:
                 scrollToInitPosition();
-            } else {
+                break;
+            case STATE_ABOVE_REFRESH_LINE:
+                scrollToInitPosition();
+                break;
+            case STATE_BELOW_REFRESH_LINE:
+                setState(STATE_REFRESHING);
                 mScrollHandlerCallback.startRefresh();
-                mIsRefreshing = true;
                 scrollToRefreshPosition();
-            }
+                break;
         }
     }
 
     /**
      *
      * @param y
-     * @param canContentScrollUp judge if content can scroll up
      * @return if has consumed the move
      */
-    boolean moveToY(int y, boolean canContentScrollUp) {
+    boolean moveToY(int y) {
         if (mStartAction) {
             int ydiff = y - mLastPointY;
             mLastPointY = y;
             if (ydiff > 0) {
-                if (canContentScrollUp) {
+                if (mScrollHandlerCallback.canContentScrollUp()) {
                     return false;
                 }
             } else {
@@ -86,6 +97,29 @@ public class ScrollHandler implements Runnable {
             int offsetDiff = (int) (ydiff * FRICTION);
             int newOffsetY = adjustOffset(mCurrentOffsetY + offsetDiff);
             mScrollHandlerCallback.onOffsetChange(newOffsetY - mCurrentOffsetY);
+            switch (mScrollState) {
+                case STATE_COMPLETE:
+                    if (mCurrentOffsetY == 0) {
+                        if (newOffsetY >= mRefreshCriticalPosition) {
+                            setState(STATE_BELOW_REFRESH_LINE);
+                        } else {
+                            setState(STATE_ABOVE_REFRESH_LINE);
+                        }
+                    }
+                    break;
+                case STATE_BELOW_REFRESH_LINE:
+                    if (newOffsetY < mRefreshCriticalPosition) {
+                        setState(STATE_ABOVE_REFRESH_LINE);
+                    }
+                    break;
+                case STATE_ABOVE_REFRESH_LINE:
+                    if (newOffsetY >= mRefreshCriticalPosition) {
+                        setState(STATE_BELOW_REFRESH_LINE);
+                    }
+                    break;
+                default:
+                    break;
+            }
             mCurrentOffsetY = newOffsetY;
             PTFLog.d("mCurrentOffset:" + mCurrentOffsetY);
             return true;
@@ -102,13 +136,16 @@ public class ScrollHandler implements Runnable {
     }
 
     private void scrollToInitPosition() {
-        mScroller.startScroll(0, mCurrentOffsetY, 0, mInitPosition - mCurrentOffsetY);
+        if (mCurrentOffsetY == mInitPosition) {
+            return;
+        }
+        mScroller.startScroll(0, mCurrentOffsetY, 0, mInitPosition - mCurrentOffsetY, 2000);
         mHandler.removeCallbacks(this);
         mHandler.post(this);
     }
 
     private void scrollToRefreshPosition() {
-        mScroller.startScroll(0, mCurrentOffsetY, 0, mRefreshingPosition - mCurrentOffsetY);
+        mScroller.startScroll(0, mCurrentOffsetY, 0, mRefreshingPosition - mCurrentOffsetY, 2000);
         mHandler.removeCallbacks(this);
         mHandler.post(this);
     }
@@ -129,12 +166,21 @@ public class ScrollHandler implements Runnable {
     }
 
     public void setRefreshComplete() {
-        mIsRefreshing = false;
         mStartAction = false;
+        setState(STATE_COMPLETE);
         scrollToInitPosition();
     }
 
     public int getCurrentOffset() {
         return mCurrentOffsetY;
+    }
+
+    private void setState(int state) {
+        if (mScrollState != state) {
+            mScrollState = state;
+            mScrollHandlerCallback.onScrollStateChanged(mScrollState);
+        } else {
+            throw new IllegalStateException("old state:" + mScrollState + ", newState:" + state);
+        }
     }
 }

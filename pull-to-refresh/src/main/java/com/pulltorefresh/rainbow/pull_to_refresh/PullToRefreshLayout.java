@@ -19,6 +19,7 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
     private final ScrollHandler mScrollHandler;
     private final int mDefaultHeaderHeight;
     private RefreshCallback mRefreshCallback;
+    private HeaderUICallback mHeaderUICallback;
 
     public PullToRefreshLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -101,6 +102,17 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
         mHeaderView = view;
     }
 
+    public void setHeaderUICallback(HeaderUICallback callback) {
+        mHeaderUICallback = callback;
+    }
+
+    public interface HeaderUICallback {
+        public void onStatePullToRefresh();
+        public void onStateReleaseToRefresh();
+        public void onStateRefreshing();
+        public void onStateComplete();
+    }
+
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         PTFLog.d("onLayout");
@@ -159,7 +171,7 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
                 mScrollHandler.downAtY((int) ev.getY());
                 break;
             case MotionEvent.ACTION_MOVE:
-                doSuper = !mScrollHandler.moveToY((int) ev.getY(), canContentScrollDown());
+                doSuper = !mScrollHandler.moveToY((int) ev.getY());
                 if (mLastDoSuper) {
                     if (!doSuper) {
                         sendCancelEvent();
@@ -200,10 +212,6 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
         super.dispatchTouchEvent(e);
     }
 
-    private boolean canContentScrollDown() {
-        return mContentView.canScrollVertically(-1);
-    }
-
     @Override
     public void onOffsetChange(int offset) {
         if (mHeaderView != null) {
@@ -222,6 +230,33 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
         if (mRefreshCallback != null) {
             mRefreshCallback.onRefresh();
         }
+    }
+
+    @Override
+    public boolean canContentScrollUp() {
+        return mContentView.canScrollVertically(-1);
+    }
+
+    @Override
+    public void onScrollStateChanged(int newState) {
+        if (mHeaderUICallback == null) {
+            return;
+        }
+        switch (newState) {
+            case ScrollHandler.STATE_ABOVE_REFRESH_LINE:
+                mHeaderUICallback.onStatePullToRefresh();
+                break;
+            case ScrollHandler.STATE_BELOW_REFRESH_LINE:
+                mHeaderUICallback.onStateReleaseToRefresh();
+                break;
+            case ScrollHandler.STATE_REFRESHING:
+                mHeaderUICallback.onStateRefreshing();
+                break;
+            case ScrollHandler.STATE_COMPLETE:
+                mHeaderUICallback.onStateComplete();
+                break;
+        }
+
     }
 
     public interface RefreshCallback {
