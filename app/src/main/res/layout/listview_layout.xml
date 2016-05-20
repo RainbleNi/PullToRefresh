@@ -9,7 +9,7 @@
         android:id="@+id/button"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="autoLoading"/>
+        android:text="auto Loading"/>
 
     <com.pulltorefresh.rainbow.pull_to_refresh.PullToRefreshLayout
         android:id="@+id/ptf_layout"

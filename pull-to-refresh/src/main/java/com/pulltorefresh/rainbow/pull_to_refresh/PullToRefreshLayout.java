@@ -164,6 +164,7 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        PTFLog.t("action:" + ev.getAction() + ", y:" + ev.getY());
         int action = ev.getAction();
         boolean doSuper = true;
         switch (action) {
@@ -260,7 +261,7 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
     }
 
     public interface RefreshCallback {
-        public void onRefresh();
+        void onRefresh();
     }
 
     public void refreshComplete() {
@@ -268,6 +269,6 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
     }
 
     public void autoRefresh() {
-
+        mScrollHandler.autoRefresh();
     }
 }

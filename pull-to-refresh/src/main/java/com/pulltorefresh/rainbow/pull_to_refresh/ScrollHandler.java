@@ -167,7 +167,9 @@ public class ScrollHandler implements Runnable {
 
     public void setRefreshComplete() {
         mStartAction = false;
-        setState(STATE_COMPLETE);
+        if (mScrollState != STATE_COMPLETE) {
+            setState(STATE_COMPLETE);
+        }
         scrollToInitPosition();
     }
 
@@ -182,5 +184,14 @@ public class ScrollHandler implements Runnable {
         } else {
             throw new IllegalStateException("old state:" + mScrollState + ", newState:" + state);
         }
+    }
+
+    void autoRefresh() {
+        mStartAction = false;
+        if (mScrollState != STATE_REFRESHING) {
+            setState(STATE_REFRESHING);
+            mScrollHandlerCallback.startRefresh();
+        }
+        scrollToRefreshPosition();
     }
 }
