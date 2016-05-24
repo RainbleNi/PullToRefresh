@@ -72,6 +72,9 @@ public class ListViewFragment extends Fragment implements PullToRefreshLayout.Re
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                if (isDetached()) {
+                    return;
+                }
                 mAdapter.setData(20);
                 ptfLayout.refreshComplete();
             }

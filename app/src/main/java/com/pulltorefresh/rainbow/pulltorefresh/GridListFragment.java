@@ -2,6 +2,7 @@ package com.pulltorefresh.rainbow.pulltorefresh;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -67,6 +68,10 @@ public class GridListFragment extends Fragment implements PullToRefreshLayout.Re
 
     @Override
     public void onRefresh() {
+        if (!isAdded()) {
+            return;
+        }
+        final Resources resources = getResources();
         new AsyncTask<Void, Void, Bitmap[]>() {
 
             @Override
@@ -77,11 +82,11 @@ public class GridListFragment extends Fragment implements PullToRefreshLayout.Re
                 for (int id : PIC_RES) {
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inJustDecodeBounds = true;
-                    BitmapFactory.decodeResource(getResources(), id, options);
+                    BitmapFactory.decodeResource(resources, id, options);
                     int inSampleSize = options.outWidth / mAdapter.mGridWidth;
                     options.inSampleSize = inSampleSize;
                     options.inJustDecodeBounds = false;
-                    bp[index++] = BitmapFactory.decodeResource(getResources(), id, options);
+                    bp[index++] = BitmapFactory.decodeResource(resources, id, options);
                 }
                 long timePass = (System.currentTimeMillis() - time);
                 if (timePass < 1000) {
@@ -96,6 +101,9 @@ public class GridListFragment extends Fragment implements PullToRefreshLayout.Re
 
             @Override
             protected void onPostExecute(Bitmap[] result) {
+                if (isDetached()) {
+                    return;
+                }
                 mAdapter.setData(result);
                 mPtfLayout.refreshComplete();
             }

@@ -56,6 +56,15 @@ import android.view.ViewGroup;
  * ptflayout.autoRefresh()
  *
  *
+ * other extend function:
+ *
+ * //set Animation duration
+ * {@link #setScrollAnimationDuration(int)}
+ * //set refresh critical position
+ * {@link #setRefreshingLine(float)}
+ * //set the coefficient of friction of pull to refresh action
+ * {@link #setCoefficientOfFriction(float)}
+ *
  * more usage see GridListFragment, ListViewFragment
  *
  * https://github.com/RainbleNi/PullToRefresh
@@ -330,5 +339,31 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
      */
     public void autoRefresh() {
         mScrollHandler.autoRefresh();
+    }
+
+    /**
+     * set Animation duration
+     * @param timeInMillion
+     */
+    public void setScrollAnimationDuration(int timeInMillion) {
+        mScrollHandler.setScrollAnimationDuration(timeInMillion);
+    }
+
+    /**
+     * the refreshing cretical point, the ratio to the header height, default is 1, the same height as header
+     * @param ratio
+     */
+    public void setRefreshingLine(float ratio) {
+        mScrollHandler.setRefreshLineRatio(ratio);
+    }
+
+
+    /**
+     * the coefficient of friction of pull to refresh action,
+     * default is 0.5. You pull 200px, the view scroll 100px .
+     * @param coefficientOfFriction
+     */
+    public void setCoefficientOfFriction(float coefficientOfFriction) {
+        mScrollHandler.setFrictionRatio(coefficientOfFriction);
     }
 }

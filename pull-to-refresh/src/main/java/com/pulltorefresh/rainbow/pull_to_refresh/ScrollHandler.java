@@ -16,7 +16,9 @@ public class ScrollHandler implements Runnable {
     private int mCurrentOffsetY;
     private int mLastPointY;
     private boolean mStartAction;
-    private static final float FRICTION = 0.5f;
+    private float mFriction = 0.5f;
+    private float mRefreshLineRatio = 1f;
+    private int mScrollAnimationDuration = 300;
     private final ScrollHandlerCallback mScrollHandlerCallback;
     private final Handler mHandler;
 
@@ -45,6 +47,23 @@ public class ScrollHandler implements Runnable {
         mRefreshingPosition = positon;
         mRefreshCriticalPosition = positon;
     }
+
+    void setFrictionRatio(float friction) {
+        mFriction = friction;
+    }
+
+    void setRefreshLineRatio(float ratio) {
+        mRefreshLineRatio = ratio;
+        if (mRefreshingPosition != 0) {
+            mRefreshCriticalPosition = (int) (mRefreshingPosition * mRefreshLineRatio);
+        }
+    }
+
+    void setScrollAnimationDuration(int duration) {
+        mScrollAnimationDuration = duration;
+    }
+
+
 
     void downAtY(int y) {
         mLastPointY = y;
@@ -92,7 +111,7 @@ public class ScrollHandler implements Runnable {
                     return false;
                 }
             }
-            int offsetDiff = (int) (ydiff * FRICTION);
+            int offsetDiff = (int) (ydiff * mFriction);
             int newOffsetY = adjustOffset(mCurrentOffsetY + offsetDiff);
             mScrollHandlerCallback.onOffsetChange(newOffsetY - mCurrentOffsetY);
             switch (mScrollState) {
@@ -136,13 +155,13 @@ public class ScrollHandler implements Runnable {
         if (mCurrentOffsetY == mInitPosition) {
             return;
         }
-        mScroller.startScroll(0, mCurrentOffsetY, 0, mInitPosition - mCurrentOffsetY, 2000);
+        mScroller.startScroll(0, mCurrentOffsetY, 0, mInitPosition - mCurrentOffsetY, mScrollAnimationDuration);
         mHandler.removeCallbacks(this);
         mHandler.post(this);
     }
 
     private void scrollToRefreshPosition() {
-        mScroller.startScroll(0, mCurrentOffsetY, 0, mRefreshingPosition - mCurrentOffsetY, 2000);
+        mScroller.startScroll(0, mCurrentOffsetY, 0, mRefreshingPosition - mCurrentOffsetY, mScrollAnimationDuration);
         mHandler.removeCallbacks(this);
         mHandler.post(this);
     }
