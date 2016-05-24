@@ -133,4 +133,4 @@ ptflayout.autoRefresh()
 
 Gif
 
-![ScreenRecord_2016-05-24-16-31-13.gif](http://upload-images.jianshu.io/upload_images/2067811-42aabd8a82f35806.gif?imageMogr2/auto-orient/strip)
+![ScreenRecord_2016-05-24-20-05-32.gif](http://upload-images.jianshu.io/upload_images/2067811-f98b79d0c34e91b6.gif?imageMogr2/auto-orient/strip)
