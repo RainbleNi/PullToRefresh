@@ -3,6 +3,7 @@
     <declare-styleable name="PullToRefreshLayout">
         <attr name="header_layout" format="reference"/>
         <attr name="content_layout" format="reference"/>
+        <attr name="scroll_id" format="reference"/>
     </declare-styleable>
     
 </resources>

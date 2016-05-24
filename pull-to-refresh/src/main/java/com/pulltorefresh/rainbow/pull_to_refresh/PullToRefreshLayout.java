@@ -2,6 +2,7 @@ package com.pulltorefresh.rainbow.pull_to_refresh;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -17,15 +18,17 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
     private View mHeaderView;
     private View mContentView;
     private final ScrollHandler mScrollHandler;
-    private final int mDefaultHeaderHeight;
     private RefreshCallback mRefreshCallback;
     private HeaderUICallback mHeaderUICallback;
+    private int mScrollId;
+    private View mScrollView;
 
     public PullToRefreshLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PullToRefreshLayout);
         mHeaderLayout = a.getResourceId(R.styleable.PullToRefreshLayout_header_layout, 0);
         mContentLayout = a.getResourceId(R.styleable.PullToRefreshLayout_content_layout, 0);
+        mScrollId = a.getResourceId(R.styleable.PullToRefreshLayout_scroll_id, 0);
         LayoutInflater inflater = LayoutInflater.from(context);
         if (mHeaderLayout != 0) {
             mHeaderView = inflater.inflate(mHeaderLayout, this, false);
@@ -34,7 +37,6 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
             mContentView = inflater.inflate(mContentLayout, this, false);
         }
         mScrollHandler = new ScrollHandler(context, this);
-        mDefaultHeaderHeight = getResources().getDimensionPixelSize(R.dimen.default_header_height);
     }
 
     @Override
@@ -80,26 +82,21 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
                             "should not declear content in xml");
                 }
             }
+        }
+        if (mHeaderView == null) {
+            inflate(getContext(), R.layout.default_header_view, this);
+            mHeaderView = findViewById(R.id.header);
+            setHeaderUICallback((HeaderUICallback) mHeaderView);
+        }
 
-        }
-    }
-
-    public void setHeaderView(View view) {
-        if (view == mHeaderView) {
-            return;
-        }
-        if (mHeaderView != null) {
-            removeView(mHeaderView);
-        }
-        if (view != null) {
-            LayoutParams lp = view.getLayoutParams();
-            if (lp == null) {
-                lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-                view.setLayoutParams(lp);
+        if (mScrollId != 0) {
+            View view = findViewById(mScrollId);
+            if (view == null) {
+                throw new IllegalStateException("can not find PullToRefreshLayout_scroll_id :" + mScrollId);
+            } else {
+                mScrollView = view;
             }
-            addView(view);
         }
-        mHeaderView = view;
     }
 
     public void setHeaderUICallback(HeaderUICallback callback) {
@@ -107,26 +104,25 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
     }
 
     public interface HeaderUICallback {
-        public void onStatePullToRefresh();
-        public void onStateReleaseToRefresh();
-        public void onStateRefreshing();
-        public void onStateComplete();
+        void onStatePullToRefresh();
+        void onStateReleaseToRefresh();
+        void onStateRefreshing();
+        void onStateComplete();
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        PTFLog.d("onLayout");
         int currentOffset = mScrollHandler.getCurrentOffset();
         MarginLayoutParams clp = (MarginLayoutParams) mContentView.getLayoutParams();
         int left = getPaddingLeft() + clp.leftMargin;
         int top = getPaddingTop() + clp.topMargin;
         mContentView.layout(left, top + currentOffset, left + mContentView.getMeasuredWidth(), top + mContentView.getMeasuredHeight() + currentOffset);
-        if (mHeaderView != null) {
-            MarginLayoutParams hlp = (MarginLayoutParams) mHeaderView.getLayoutParams();
-            int hLeft = getPaddingLeft() + hlp.leftMargin;
-            int hBottom = 0 - hlp.bottomMargin;
-            mHeaderView.layout(hLeft, hBottom - mHeaderView.getMeasuredHeight() + currentOffset, hLeft + mHeaderView.getMeasuredWidth(), hBottom + currentOffset);
-        }
+
+        MarginLayoutParams hlp = (MarginLayoutParams) mHeaderView.getLayoutParams();
+        int hLeft = getPaddingLeft() + hlp.leftMargin;
+        int hBottom = 0 - hlp.bottomMargin;
+        mHeaderView.layout(hLeft, hBottom - mHeaderView.getMeasuredHeight() + currentOffset, hLeft + mHeaderView
+                .getMeasuredWidth(), hBottom + currentOffset);
     }
 
     @Override
@@ -137,39 +133,38 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         MarginLayoutParams clp = (MarginLayoutParams) mContentView.getLayoutParams();
-        /*int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        int hightMode = MeasureSpec.getMode(heightMeasureSpec);
-        int hightSize = MeasureSpec.getSize(heightMeasureSpec);*/
-
 
         measureChildWithMargins(mContentView, widthMeasureSpec, 0, heightMeasureSpec, 0);
         int width = mContentView.getMeasuredWidth() + clp.leftMargin + clp.rightMargin + getPaddingLeft() + getPaddingRight();
         int height = mContentView.getMeasuredHeight() + clp.topMargin + clp.bottomMargin + getPaddingTop() + getPaddingBottom();
         setMeasuredDimension(resolveSize(width, widthMeasureSpec), resolveSize(height, heightMeasureSpec));
 
-        if (mHeaderView != null) {
-                measureChildWithMargins(mHeaderView, MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY)
-                    , 0,
-                    MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY), 0);
-            MarginLayoutParams hlp = (MarginLayoutParams) mHeaderView.getLayoutParams();
-            mScrollHandler.setRefreshPosition(mHeaderView.getMeasuredHeight() + hlp.topMargin + hlp.bottomMargin);
-        } else {
-            mScrollHandler.setRefreshPosition(mDefaultHeaderHeight);
-        }
+        measureChildWithMargins(mHeaderView, MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY)
+                , 0,
+                MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY), 0);
+        MarginLayoutParams hlp = (MarginLayoutParams) mHeaderView.getLayoutParams();
+        mScrollHandler.setRefreshPosition(mHeaderView.getMeasuredHeight() + hlp.topMargin + hlp.bottomMargin);
+        PTFLog.t("onMeasure");
     }
 
     private boolean mLastDoSuper = true;
     private MotionEvent mLastEvent;
+    private boolean mDispatchToScrollView = false;
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        PTFLog.t("action:" + ev.getAction() + ", y:" + ev.getY());
         int action = ev.getAction();
         boolean doSuper = true;
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mScrollHandler.downAtY((int) ev.getY());
+                Rect rect = new Rect();
+                if (mScrollView != null && mScrollView.getVisibility() == VISIBLE && mScrollView.getGlobalVisibleRect
+                        (rect) && rect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
+                    mDispatchToScrollView = true;
+                } else {
+                    mDispatchToScrollView = false;
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 doSuper = !mScrollHandler.moveToY((int) ev.getY());
@@ -193,21 +188,18 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
         mLastDoSuper = doSuper;
 
         if (doSuper) {
-            return super.dispatchTouchEvent(ev);
-        } else {
-            return true;
+            super.dispatchTouchEvent(ev);
         }
+        return true;
     }
 
     private void sendCancelEvent() {
-        PTFLog.d("sendCancelEvent");
         MotionEvent e = MotionEvent.obtain(mLastEvent.getDownTime(), mLastEvent.getEventTime(), MotionEvent
                 .ACTION_CANCEL, mLastEvent.getX(), mLastEvent.getY(), mLastEvent.getMetaState());
         super.dispatchTouchEvent(e);
     }
 
     private void sendDownEvent() {
-        PTFLog.d("sendDownEvent");
         MotionEvent e = MotionEvent.obtain(mLastEvent.getDownTime(), mLastEvent.getEventTime(), MotionEvent
                 .ACTION_DOWN, mLastEvent.getX(), mLastEvent.getY(), mLastEvent.getMetaState());
         super.dispatchTouchEvent(e);
@@ -215,11 +207,8 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
 
     @Override
     public void onOffsetChange(int offset) {
-        if (mHeaderView != null) {
-            mHeaderView.offsetTopAndBottom(offset);
-        }
+        mHeaderView.offsetTopAndBottom(offset);
         mContentView.offsetTopAndBottom(offset);
-        PTFLog.d("content top:" + mContentView.getTop());
     }
 
     public void setRefreshCallback(RefreshCallback callback) {
@@ -235,7 +224,11 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
 
     @Override
     public boolean canContentScrollUp() {
-        return mContentView.canScrollVertically(-1);
+        if (mDispatchToScrollView) {
+            return mScrollView.canScrollVertically(-1);
+        } else {
+            return mContentView.canScrollVertically(-1);
+        }
     }
 
     @Override

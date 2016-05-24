@@ -20,7 +20,6 @@ public class ScrollHandler implements Runnable {
     private final ScrollHandlerCallback mScrollHandlerCallback;
     private final Handler mHandler;
 
-
     private final Scroller mScroller;
 
     interface ScrollHandlerCallback {
@@ -90,7 +89,6 @@ public class ScrollHandler implements Runnable {
                 }
             } else {
                 if (mCurrentOffsetY == mInitPosition) {
-                    PTFLog.d("mCurrentOffsetY == mInitPosition");
                     return false;
                 }
             }
@@ -121,7 +119,6 @@ public class ScrollHandler implements Runnable {
                     break;
             }
             mCurrentOffsetY = newOffsetY;
-            PTFLog.d("mCurrentOffset:" + mCurrentOffsetY);
             return true;
         } else {
             return false;
@@ -161,7 +158,6 @@ public class ScrollHandler implements Runnable {
         }
         mScrollHandlerCallback.onOffsetChange(newOffsetY - mCurrentOffsetY);
         mCurrentOffsetY = newOffsetY;
-        PTFLog.d("mCurrentOffset:" + mCurrentOffsetY);
 
     }
 

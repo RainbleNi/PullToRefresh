@@ -18,13 +18,9 @@ import android.widget.TextView;
  */
 public class MainFragment extends Fragment implements AdapterView.OnItemClickListener{
 
-    private String[] sTitles = new String[] {
-            "例子1",
-            "例子2",
-            "例子3",
-            "例子4",
-            "例子5",
-            "例子6",
+    private int[] sTitles = new int[] {
+            R.string.case1,
+            R.string.case2,
     };
 
 
@@ -71,9 +67,9 @@ public class MainFragment extends Fragment implements AdapterView.OnItemClickLis
     }
 
     public class GridAdapter extends BaseAdapter {
-        private final String[] mTitles;
+        private final int[] mTitles;
         private final LayoutInflater mLayoutInflater;
-        public GridAdapter(Context context, String[] titles) {
+        public GridAdapter(Context context, int[] titles) {
             mTitles = titles;
             mLayoutInflater = LayoutInflater.from(context);
         }

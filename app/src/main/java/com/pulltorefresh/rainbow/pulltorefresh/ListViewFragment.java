@@ -24,7 +24,6 @@ public class ListViewFragment extends Fragment implements PullToRefreshLayout.Re
     private PictureAdapter mAdapter;
     private Handler mHandler = new Handler(Looper.getMainLooper());
     PullToRefreshLayout ptfLayout;
-    private int mCount = 10;
 
     @Nullable
     @Override
@@ -63,7 +62,7 @@ public class ListViewFragment extends Fragment implements PullToRefreshLayout.Re
 
         ListView listView = (ListView) root.findViewById(R.id.listview);
         mAdapter = new PictureAdapter(getActivity());
-        mAdapter.setData(mCount = 30 - mCount);
+        mAdapter.setData(20);
         listView.setAdapter(mAdapter);
         return root;
     }
@@ -73,7 +72,7 @@ public class ListViewFragment extends Fragment implements PullToRefreshLayout.Re
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mAdapter.setData(mCount = 30 - mCount);
+                mAdapter.setData(20);
                 ptfLayout.refreshComplete();
             }
         }, 3000);

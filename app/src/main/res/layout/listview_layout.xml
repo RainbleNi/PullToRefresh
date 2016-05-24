@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
@@ -7,14 +8,18 @@
     
     <Button
         android:id="@+id/button"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="50dp"
-        android:text="auto Loading"/>
+        android:text="auto Loading"
+        android:layout_gravity="center_horizontal"/>
 
     <com.pulltorefresh.rainbow.pull_to_refresh.PullToRefreshLayout
         android:id="@+id/ptf_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:background="#f0f0f0"
+        app:scroll_id="@+id/listview">
 
         <TextView
             android:id="@+id/header"
@@ -23,10 +28,24 @@
             android:text="加载中"
             android:gravity="center"/>
 
-        <ListView
-            android:id="@+id/listview"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:gravity="center"
+                android:text="This case show the content include a listview."
+                android:background="@android:color/holo_green_light"/>
+
+            <ListView
+                android:id="@+id/listview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+
 
     </com.pulltorefresh.rainbow.pull_to_refresh.PullToRefreshLayout>
 

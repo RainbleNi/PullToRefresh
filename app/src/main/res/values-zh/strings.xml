@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">PullToRefresh</string>
+    <string name="case1">content是一个GridView,使用默认的下拉刷新样式</string>
+    <string name="case2">content中包含一个Listview和Textview,自定义下拉刷新样式</string>
+</resources>
