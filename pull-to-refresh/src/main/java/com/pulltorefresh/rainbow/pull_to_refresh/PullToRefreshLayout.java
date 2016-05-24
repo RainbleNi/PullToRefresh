@@ -10,7 +10,55 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * Created by Nirui on 16/5/17.
+ * usage
+ *
+ * xml define
+ *
+ <com.pulltorefresh.rainbow.pull_to_refresh.PullToRefreshLayout
+     android:id="@+id/ptf_layout"
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"
+     // you can define header in .xml use header_layout
+     // ptf:header_layout="@layout/header_layout"
+
+     // you can define content in .xml use content_layout
+     // ptf:content_layout="@layout/content_layout"
+
+     // if there is scrollview(such as listview, gridview, scrollview) in content, so define it to perform currently.
+     // ptf:scroll_id="@+id/scrollview"
+
+     //you can also difine header view yourself, if no define, will use DefaultHeaderView
+     <View />
+
+
+     <GridView
+        android:id="@+id/gridview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:numColumns="2"/>
+
+ </com.pulltorefresh.rainbow.pull_to_refresh.PullToRefreshLayout>
+ *
+ * in java
+ *
+ * PullToRefreshLayout ptfLayout = (PullToRefreshLayout) root.findViewById(R.id.ptf_layout);
+ *
+ * //register refresh callback
+ * ptfLayout.setRefreshCallback();
+ *
+ * //register header ui callback
+ * ptflayout.setHeaderUICallback();
+ *
+ * //call when refresh is completed
+ * ptflayout.refreshComplete()
+ *
+ * //start auto refresh without MotionEvent
+ * ptflayout.autoRefresh()
+ *
+ *
+ * more usage see GridListFragment, ListViewFragment
+ *
+ * https://github.com/RainbleNi/PullToRefresh
  */
 public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.ScrollHandlerCallback {
     private int mHeaderLayout;
@@ -22,6 +70,23 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
     private HeaderUICallback mHeaderUICallback;
     private int mScrollId;
     private View mScrollView;
+
+    /**
+     * refresh callback, use to receive refresh event
+     */
+    public interface RefreshCallback {
+        void onRefresh();
+    }
+
+    /**
+     * contain 4 UI states of header, usage see DefaultHeaderView.
+     */
+    public interface HeaderUICallback {
+        void onStatePullToRefresh();
+        void onStateReleaseToRefresh();
+        void onStateRefreshing();
+        void onStateComplete();
+    }
 
     public PullToRefreshLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -99,15 +164,12 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
         }
     }
 
+    /**
+     * HeaderUICallback is used to adjust ui of header
+     * @param callback
+     */
     public void setHeaderUICallback(HeaderUICallback callback) {
         mHeaderUICallback = callback;
-    }
-
-    public interface HeaderUICallback {
-        void onStatePullToRefresh();
-        void onStateReleaseToRefresh();
-        void onStateRefreshing();
-        void onStateComplete();
     }
 
     @Override
@@ -211,6 +273,9 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
         mContentView.offsetTopAndBottom(offset);
     }
 
+    /**
+     * @param callback
+     */
     public void setRefreshCallback(RefreshCallback callback) {
         mRefreshCallback = callback;
     }
@@ -253,14 +318,16 @@ public class PullToRefreshLayout extends ViewGroup implements ScrollHandler.Scro
 
     }
 
-    public interface RefreshCallback {
-        void onRefresh();
-    }
-
+    /**
+     * should call this method when refresh is completed.
+     */
     public void refreshComplete() {
         mScrollHandler.setRefreshComplete();
     }
 
+    /**
+     * show refresh animation auto, without MotionEvent
+     */
     public void autoRefresh() {
         mScrollHandler.autoRefresh();
     }
