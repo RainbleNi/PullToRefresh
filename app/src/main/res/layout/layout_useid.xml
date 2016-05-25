@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.pulltorefresh.rainbow.pull_to_refresh.PullToRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ptf="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    ptf:header_layout="@layout/header"
+    ptf:content_layout="@layout/content"/>

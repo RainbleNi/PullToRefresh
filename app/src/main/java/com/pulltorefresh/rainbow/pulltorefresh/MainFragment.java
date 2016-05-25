@@ -45,7 +45,7 @@ public class MainFragment extends Fragment implements AdapterView.OnItemClickLis
                 replaceFragment(ListViewFragment.class);
                 break;
             case 2:
-                replacePftFragment(R.layout.ptf_layout_wrap_content);
+                replacePftFragment(R.layout.layout_useid);
                 break;
             default:
                 break;

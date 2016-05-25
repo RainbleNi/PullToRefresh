@@ -53,6 +53,7 @@ public class GridListFragment extends Fragment implements PullToRefreshLayout.Re
         View root = inflater.inflate(R.layout.gridview_layout, container, false);
         mPtfLayout = (PullToRefreshLayout) root.findViewById(R.id.ptf_layout);
         mPtfLayout.setRefreshCallback(this);
+        mPtfLayout.setScrollAnimationDuration(2000);
         GridView gridView = (GridView) root.findViewById(R.id.gridview);
         gridView.setOnItemClickListener(this);
         mAdapter = new PictureAdapter(getActivity());

@@ -31,26 +31,27 @@ public class ListViewFragment extends Fragment implements PullToRefreshLayout.Re
         View root = inflater.inflate(R.layout.listview_layout, container, false);
         ptfLayout = (PullToRefreshLayout) root.findViewById(R.id.ptf_layout);
         ptfLayout.setRefreshCallback(this);
+        ptfLayout.setScrollAnimationDuration(2000);
         final TextView headView = (TextView) root.findViewById(R.id.header);
         ptfLayout.setHeaderUICallback(new PullToRefreshLayout.HeaderUICallback() {
             @Override
             public void onStatePullToRefresh() {
-                headView.setText("下拉刷新");
+                headView.setText("Pull to refresh");
             }
 
             @Override
             public void onStateReleaseToRefresh() {
-                headView.setText("松开刷新");
+                headView.setText("Release to refresh");
             }
 
             @Override
             public void onStateRefreshing() {
-                headView.setText("刷新中");
+                headView.setText("In refreshing");
             }
 
             @Override
             public void onStateComplete() {
-                headView.setText("更新完成");
+                headView.setText("Refresh completed");
             }
         });
         root.findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
