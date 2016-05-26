@@ -1,4 +1,5 @@
 # PullToRefresh
+中文文档：http://www.jianshu.com/p/9c15509f60d3
 Implement the effect of pull to refresh.
 [![](https://jitpack.io/v/RainbleNi/PullToRefresh.svg)](https://jitpack.io/#RainbleNi/PullToRefresh)
 
